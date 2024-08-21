@@ -121,9 +121,6 @@ train_label_dict, train_meta_list = get_label_list(train_index_list)
 val_label_dict, val_meta_list = get_label_list(val_index_list)
 test_label_dict, test_meta_list = get_label_list(test_index_list)
 
-############################这里的P2应该改成metadata直接通过一个multi-classification输出的P2#####################
-#############################################然后后续是P2和P1的search##############################################
-
 train_meta_array = np.array(train_meta_list)
 print("train_meta_array.shape:", train_meta_array.shape)
 
