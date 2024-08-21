@@ -25,7 +25,7 @@ class Swish_Module(nn.Module):
         return Swish.apply(x)
 
 
-class Single_Modality(nn.Module):  # 自定义单模态输入网络
+class Single_Modality(nn.Module):  
     def __init__(self, class_list):
         super().__init__()
         self.num_label = class_list[0]
@@ -343,87 +343,6 @@ class Bottlrneck(torch.nn.Module):
             residual = x
         return self.layer(x)+residual
 
-
-class ResNet1(torch.nn.Module):
-    def __init__(self,in_channels=2,classes=5):
-        super(ResNet1, self).__init__()
-        self.features = torch.nn.Sequential(
-            torch.nn.Conv1d(in_channels,64,kernel_size=7,stride=2,padding=3),
-            torch.nn.MaxPool1d(3,2,1),
-
-            Bottlrneck(64,64,256,False),
-            Bottlrneck(256,64,256,False),
-            Bottlrneck(256,64,256,False),
-            #
-            Bottlrneck(256,128,512, True),
-            Bottlrneck(512,128,512, False),
-            Bottlrneck(512,128,512, False),
-            Bottlrneck(512,128,512, False),
-            #
-            Bottlrneck(512,256,1024, True),
-            Bottlrneck(1024,256,1024, False),
-            Bottlrneck(1024,256,1024, False),
-            Bottlrneck(1024,256,1024, False),
-            Bottlrneck(1024,256,1024, False),
-            Bottlrneck(1024,256,1024, False),
-            #
-            Bottlrneck(1024,512,2048, True),
-            Bottlrneck(2048,512,2048, False),
-            Bottlrneck(2048,512,2048, False),
-
-            torch.nn.AdaptiveAvgPool1d(1)
-        )
-        self.classifer = torch.nn.Sequential(
-            torch.nn.Linear(2048,classes)
-        )
-
-    def forward(self,x):
-        x = self.features(x)
-        x = x.view(-1,2048)
-        x = self.classifer(x)
-        return x
-
-
-import torch
-import torch.nn as nn
-
-class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=1):
-        super(ResidualBlock, self).__init__()
-        self.conv1 = nn.Conv1d(in_channels, out_channels, kernel_size=1, stride=stride, padding=0)
-        self.bn1 = nn.BatchNorm1d(out_channels)
-        self.conv2 = nn.Conv1d(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.bn2 = nn.BatchNorm1d(out_channels)
-        self.conv3 = nn.Conv1d(out_channels, out_channels * 4, kernel_size=1, stride=1, padding=0)
-        self.bn3 = nn.BatchNorm1d(out_channels * 4)
-        self.relu = nn.ReLU(inplace=True)
-        self.downsample = None
-        if stride != 1 or in_channels != out_channels * 4:
-            self.downsample = nn.Sequential(
-                nn.Conv1d(in_channels, out_channels * 4, kernel_size=1, stride=stride, padding=0),
-                nn.BatchNorm1d(out_channels * 4)
-            )
-
-    def forward(self, x):
-        identity = x
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
-
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu(out)
-
-        out = self.conv3(out)
-        out = self.bn3(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-        out = self.relu(out)
-        return out
-
 class ResNet50_uncertainty(nn.Module):
     def __init__(self, class_list):
         super(ResNet50_uncertainty, self).__init__()
@@ -481,96 +400,6 @@ class ResNet50_uncertainty(nn.Module):
         x = self.fc_1(x)
         x = self.fc_2(x)
         x = self.fc_3(x)
-        logit_x = self.fc(x)
-        logit_pn_x = self.fc_pn(x)
-        logit_str_x = self.fc_str(x)
-        logit_pig_x = self.fc_pig(x)
-        logit_rs_x = self.fc_rs(x)
-        logit_dag_x = self.fc_dag(x)
-        logit_bwv_x = self.fc_bwv(x)
-        logit_vs_x = self.fc_vs(x)
-        logit_uncertainty_x = self.fc_uncertainty(x)
-
-        return [(logit_x, logit_pn_x, logit_str_x, logit_pig_x, logit_rs_x, logit_dag_x, logit_bwv_x, logit_vs_x,
-                 logit_uncertainty_x)]
-
-    def criterion(self, logit, truth):
-        loss = nn.CrossEntropyLoss()(logit, truth)
-        return loss
-
-    def criterion1(self, logit, truth):
-        loss = nn.L1Loss()(logit, truth)
-        return loss
-
-    def criterion_MSE(self, logit, truth):
-        logit = nn.Sigmoid()(logit)
-        loss = nn.MSELoss()(logit, truth)
-        return loss
-
-    def metric(self, logit, truth):
-        _, prediction = torch.max(logit.data, 1)
-        acc = torch.sum(prediction == truth)
-        return acc
-
-    def set_mode(self, mode):
-        self.mode = mode
-        if mode in ["eval", "valid", "test"]:
-            self.eval()
-        elif mode in ["train"]:
-            self.train()
-        else:
-            raise NotImplementedError
-
-# 定义一维卷积神经网络模型
-class MyCNN(nn.Module):
-    def __init__(self,class_list):
-        super(MyCNN, self).__init__()
-        self.num_label = class_list[0]
-        self.num_pn = class_list[1]
-        self.num_str = class_list[2]
-        self.num_pig = class_list[3]
-        self.num_rs = class_list[4]
-        self.num_dag = class_list[5]
-        self.num_bwv = class_list[6]
-        self.num_vs = class_list[7]
-        self.num_uncertainty = class_list[8]
-        self.dropout = nn.Dropout(0.6)
-
-        self.conv1 = nn.Conv1d(1, 16, kernel_size=1, stride=1, padding=0)
-        self.relu = nn.ReLU()
-        self.pool = nn.MaxPool1d(kernel_size=2, stride=1)
-        self.conv2 = nn.Conv1d(16,32,kernel_size=2,stride=1)
-        self.conv3 = nn.Conv1d(32,64,kernel_size=2,stride=1)
-        self.conv4 = nn.Conv1d(64,128,1,1)
-        self.conv5 = nn.Conv1d(128,256,1,1)
-        self.conv6 = nn.Conv1d(256,256,1,1)
-        self.fc0 = nn.Linear(9984, 1000)
-        self.fc1 = nn.Linear(1000,100)
-        self.fc2 = nn.Linear(100,32)
-        self.fc = nn.Linear(32, self.num_label)
-        self.fc_pn = nn.Linear(32, self.num_pn)
-        self.fc_str = nn.Linear(32, self.num_str)
-        self.fc_pig = nn.Linear(32, self.num_pig)
-        self.fc_rs = nn.Linear(32, self.num_rs)
-        self.fc_dag = nn.Linear(32, self.num_dag)
-        self.fc_bwv = nn.Linear(32, self.num_bwv)
-        self.fc_vs = nn.Linear(32, self.num_vs)
-        self.fc_uncertainty = nn.Linear(32, self.num_uncertainty)
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.relu(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.conv5(x)
-        x = self.conv6(x)
-        x = self.pool(x)
-        x = x.view(x.size(0), -1)
-        #print(x.shape)
-        x = self.fc0(x)
-        x = self.fc1(x)
-        x = self.dropout(x)
-        x = self.fc2(x)
         logit_x = self.fc(x)
         logit_pn_x = self.fc_pn(x)
         logit_str_x = self.fc_str(x)
