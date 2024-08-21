@@ -64,7 +64,7 @@ def get_label_list(image_index_list):
         source_dir = '../release_v0/release_v0/images/'
         clinic_img = cv2.imread(source_dir + clinic_path[index_num])
         dermoscopy_img = cv2.imread(source_dir + dermoscopy_path[index_num])
-        '''这里对于metadata需要变更'''
+        '''selected metadata: change here'''
         meta_vector_one_hot, meta_vector = encode_meta_choosed_label(img_info, index_num)
 
         [diagnosis_label, pigment_network_label, streaks_label, pigmentation_label, regression_structures_label,
