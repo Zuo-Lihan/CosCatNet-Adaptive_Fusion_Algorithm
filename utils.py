@@ -9,8 +9,8 @@ import torch
 #    res = np.eye(nb_classes)[np.array(targets).reshape(-1)]
 #    return res.reshape(list(targets.shape)+[nb_classes])
 
-def get_parameter_number(net):#《基本操作》
-    total_num = sum(p.numel() for p in net.parameters())  #numel()用来返回数组中元素的个数；net.parameters()是pytorch中的用法
+def get_parameter_number(net):#
+    total_num = sum(p.numel() for p in net.parameters())  
     trainable_num = sum(p.numel() for p in net.parameters() if p.requires_grad)
     print({'Total': total_num, 'Trainable': trainable_num})
     #return {'Total': total_num, 'Trainable': trainable_num}
@@ -27,7 +27,7 @@ def create_cosine_learning_schedule(epochs,lr):  #用来更新学习率策略#
 
     return cosine_learning_schedule
 
-class Logger:   #日志类#《基本操作》
+class Logger:   #日志类
 
     def __int__(self):
         super(Logger, self).__int__()
@@ -42,7 +42,7 @@ class Logger:   #日志类#《基本操作》
     def close(self):
         self.txt.close()
 
-def set_seed(seed=15):#设置随机种子#《基本操作》
+def set_seed(seed=15):#设置随机种子
       import random
       random.seed(seed)
       os.environ['PYTHONHASHSEED'] =str(seed)  #设置随机种子，将PYTHONHASHSEED环境变量设为某一值，对于某些基于散列的操作具有可重现的意义。
@@ -52,7 +52,7 @@ def set_seed(seed=15):#设置随机种子#《基本操作》
       torch.cuda.manual_seed_all(seed)#如果使用多个GPU，则用torch.cuda.manual_seed_all为所有GPU设置随机种子
       torch.backends.cudnn.deterministic = True#保证每次返回的卷积算法是确定的
 
-def CreateLogger(mode, model_name='resnet-50',round_=None,data_mode='Normal'):#《基本操作》
+def CreateLogger(mode, model_name='resnet-50',round_=None,data_mode='Normal'):#
     """
     param：
     mode:multi-modal/single-modal
@@ -78,7 +78,7 @@ def CreateLogger(mode, model_name='resnet-50',round_=None,data_mode='Normal'):#�
 
     return log, out_dir
 
-def adjust_learning_rate(optimizer, lr):#动态修改优化器的学习率#《基本操作》
+def adjust_learning_rate(optimizer, lr):#动态修改优化器的学习率#
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
