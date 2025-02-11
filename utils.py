@@ -15,7 +15,7 @@ def get_parameter_number(net):#
     print({'Total': total_num, 'Trainable': trainable_num})
     #return {'Total': total_num, 'Trainable': trainable_num}
 
-def create_cosine_learning_schedule(epochs,lr):  #用来更新学习率策略#
+def create_cosine_learning_schedule(epochs,lr):  #
     cosine_learning_schedule = []
 
     for epoch in range(epochs):
@@ -27,7 +27,7 @@ def create_cosine_learning_schedule(epochs,lr):  #用来更新学习率策略#
 
     return cosine_learning_schedule
 
-class Logger:   #日志类
+class Logger:   
 
     def __int__(self):
         super(Logger, self).__int__()
@@ -45,27 +45,27 @@ class Logger:   #日志类
 def set_seed(seed=15):#设置随机种子
       import random
       random.seed(seed)
-      os.environ['PYTHONHASHSEED'] =str(seed)  #设置随机种子，将PYTHONHASHSEED环境变量设为某一值，对于某些基于散列的操作具有可重现的意义。
+      os.environ['PYTHONHASHSEED'] =str(seed)  #
       np.random.seed(seed)
-      torch.manual_seed(seed)#torch为CPU设置种子生成随机数，使结果是确定的
-      torch.cuda.manual_seed(seed)#为当前GPU设置随机种子
-      torch.cuda.manual_seed_all(seed)#如果使用多个GPU，则用torch.cuda.manual_seed_all为所有GPU设置随机种子
-      torch.backends.cudnn.deterministic = True#保证每次返回的卷积算法是确定的
+      torch.manual_seed(seed)#
+      torch.cuda.manual_seed(seed)#
+      torch.cuda.manual_seed_all(seed)#
+      torch.backends.cudnn.deterministic = True#
 
 def CreateLogger(mode, model_name='resnet-50',round_=None,data_mode='Normal'):#
     """
     param：
     mode:multi-modal/single-modal
     model_name：resnet-50/FusionM4Net/...
-    round_：第几次
-    data_mode:数据模式 "Normal"/"evaluated"...
+    round_：times
+    data_mode: "Normal"/"evaluated"...
     """
     out_dir = './{}_{}_{}_weight_file/{}/'.format(mode,model_name,data_mode,round_)
     os.makedirs(out_dir + '/checkpoint/', exist_ok=True)
     os.makedirs(out_dir + '/train/', exist_ok=True)
     #os.makedirs(out_dir + '/backup/', exist_ok=True)
 
-    log = Logger() #创建日志类对象
+    log = Logger() #
     log.open(out_dir + '/log.single_modality_{}_skinlesion.txt'.format(mode), mode='w')
     log.write('\n--- [START %s] %s\n\n' % ('IDENTIFIER', '-' * 64))
     # log.write('\t__file__     = %s\n' % __file__)
@@ -78,11 +78,11 @@ def CreateLogger(mode, model_name='resnet-50',round_=None,data_mode='Normal'):#
 
     return log, out_dir
 
-def adjust_learning_rate(optimizer, lr):#动态修改优化器的学习率#
+def adjust_learning_rate(optimizer, lr):#
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-def encode_label(img_info, index_num):#编码标签
+def encode_label(img_info, index_num):#
     # Encode the diagnositic label
     diagnosis_label = img_info['diagnosis'][index_num]
     for index, label in enumerate(label_list):
