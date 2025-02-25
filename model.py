@@ -36,7 +36,7 @@ class Single_Modality(nn.Module):
         self.num_dag = class_list[5]
         self.num_bwv = class_list[6]
         self.num_vs = class_list[7]
-        self.dropout = nn.Dropout(0.6)      #调整Dropout
+        self.dropout = nn.Dropout(0.6)     
 
         self.model_single = torchvision.models.resnet50(pretrained=True)
 
@@ -55,7 +55,7 @@ class Single_Modality(nn.Module):
             nn.Linear(2048, 512),
             nn.BatchNorm1d(512),
             Swish_Module(),
-            nn.Dropout(p=0.6),###Dropout调整
+            nn.Dropout(p=0.6),
             nn.Linear(512, 128),
             nn.BatchNorm1d(128),
             Swish_Module(),
@@ -1127,7 +1127,7 @@ class Resnet_with_uncertainty(nn.Module):
 
 
 ################################################################################################
-class ResNet_with_Coattention(nn.Module):  # ResNet网络 with Coattention(with concatenate)
+class ResNet_with_Coattention(nn.Module):  # ResNet with Coattention(with concatenate)
 
     def __init__(self, class_list):
         super().__init__()
